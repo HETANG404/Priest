@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - main  # 监听 main 分支提交
-  pull_request:
-    branches:
-      - main  # 监听 PR
 
 jobs:
   update-requirements:
@@ -14,7 +11,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3  # 拉取代码
+      uses: actions/checkout@v3  # 获取仓库代码
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -27,22 +24,13 @@ jobs:
     - name: Generate requirements.txt
       run: |
         pipreqs --force --ignore .venv,tests .  # 重新生成 requirements.txt
-        cat requirements.txt  # 打印新生成的 requirements.txt
+        cat requirements.txt  # 显示内容（方便 Debug）
 
-    - name: Check for changes
-      run: |
-        git diff requirements.txt > diff.txt
-        if [ -s diff.txt ]; then
-          echo "CHANGED=true" >> $GITHUB_ENV
-        else
-          echo "CHANGED=false" >> $GITHUB_ENV
-        fi
-
-    - name: Commit and push if changed
-      if: env.CHANGED == 'true'
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add requirements.txt
-        git commit -m "Auto-update requirements.txt"
-        git push
+    - name: Create Pull Request if changed
+      uses: peter-evans/create-pull-request@v5
+      with:
+        title: "Auto-update requirements.txt"
+        body: "This PR automatically updates `requirements.txt` based on the latest imports in the codebase."
+        branch: "update-requirements"
+        delete-branch: true
+        commit-message: "Auto-update requirements.txt"
