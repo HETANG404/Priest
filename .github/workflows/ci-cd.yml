@@ -5,6 +5,10 @@ on:
     branches:
       - main  # 监听 main 分支提交
 
+permissions:
+  contents: write  # 允许 GitHub Actions 推送更改
+
+
 jobs:
   update-requirements:
     runs-on: ubuntu-latest
