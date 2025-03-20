@@ -1,5 +1,4 @@
 name: Auto Update Requirements
-
 on:
   push:
     branches:
@@ -7,39 +6,37 @@ on:
   pull_request:
     branches:
       - main
-
 jobs:
   update-requirements:
     name: 更新 requirements.txt
     runs-on: ubuntu-latest
     permissions:
       contents: write  # 允许 GitHub Actions 写入仓库
-
     steps:
       - name: 🚀 检出代码
         uses: actions/checkout@v4
-
-      - name: 💾 缓存 pip 依赖
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
+        
       - name: 🏗 设置 Python 环境
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-
+          
+      - name: 📦 缓存 pip 依赖
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            
       - name: 🛠️ 安装 pipreqs
         run: pip install pipreqs
-
+        
       - name: 📦 生成 requirements.txt
         run: |
           pipreqs --force --ignore .venv,tests .
           cat requirements.txt
-
+          
       - name: 🔍 检查是否有变化
         id: check_diff
         run: |
@@ -49,7 +46,7 @@ jobs:
           else
             echo "CHANGED=false" >> $GITHUB_ENV
           fi
-
+          
       - name: 💾 提交更新
         if: env.CHANGED == 'true'  # 仅在 requirements.txt 变更时提交
         uses: stefanzweifel/git-auto-commit-action@v4
