@@ -37,30 +37,35 @@ Priest/
 ├── config/
 │   ├── __init__.py
 │   ├── settings.py       # 项目配置
-│   └── database.py       # 数据库配置
+│   ├── mysql.py          # MySQL配置
+│   └── redis.py          # Redis配置
 │
 ├── src/
 │   │
 │   ├── core/
-│   │   ├── spider.py     # 爬虫核心逻辑
-│   │   └── scheduler.py  # 调度器（模式选择入口）
+│   │   ├── spider.py
+│   │   └── scheduler.py
 │   │
 │   ├── db/
-│   │   ├── manager.py    # 数据库管理
-│   │   └── models.py     # 数据模型
+│   │   ├── __init__.py
+│   │   ├── mysql_manager.py   # MySQL操作
+│   │   ├── redis_manager.py   # Redis操作
+│   │   ├── query_handler.py   # 新增查询处理器
+│   │   └── models.py
 │   │
 │   ├── utils/
-│   │   ├── downloader.py # 下载管理器
-│   │   └── logger.py     # 日志配置
+│   │   ├── downloader.py
+│   │   └── logger.py
 │   │
-│   └── cli.py            # 命令行入口
+│   └── cli.py
 │
 ├── data/
-│   ├── images/           # 下载图片存储目录
-│   └── database/         # 数据库文件存储目录
+│   ├── images/
+│   └── database/         # 保留目录（存放迁移脚本等）
 │
-├── tests/                # 单元测试
-├── requirements.txt      # 依赖文件
-└── README.md             # 项目说明
+├── migrations/           # 新增数据库迁移目录
+├── tests/
+├── requirements.txt
+└── README.md
 
 ```
