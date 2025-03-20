@@ -1,40 +1,53 @@
-name: Update Requirements
+name: Auto Update Requirements
 
 on:
   push:
     branches:
-      - main  # 监听 main 分支提交
-
-permissions:
-  contents: write  # 允许 GitHub Actions 推送更改
-
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   update-requirements:
+    name: 更新 requirements.txt
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write  # 允许 GitHub Actions 写入仓库
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3  # 获取仓库代码
+      - name: 🚀 检出代码
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'  # 选择 Python 版本
+      - name: 🏗 设置 Python 环境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Install pipreqs
-      run: pip install pipreqs  # 安装 pipreqs
+      - name: 🛠️ 安装 pipreqs
+        run: pip install pipreqs
 
-    - name: Generate requirements.txt
-      run: |
-        pipreqs --force --ignore .venv,tests .  # 重新生成 requirements.txt
-        cat requirements.txt  # 显示内容（方便 Debug）
+      - name: 📦 生成 requirements.txt
+        run: |
+          pipreqs --force --ignore .venv,tests .
+          cat requirements.txt
 
-    - name: Create Pull Request if changed
-      uses: peter-evans/create-pull-request@v5
-      with:
-        title: "Auto-update requirements.txt"
-        body: "This PR automatically updates `requirements.txt` based on the latest imports in the codebase."
-        branch: "update-requirements"
-        delete-branch: true
-        commit-message: "Auto-update requirements.txt"
+      - name: 🔍 检查是否有变化
+        id: check_diff
+        run: |
+          git diff requirements.txt > diff.txt
+          if [ -s diff.txt ]; then
+            echo "CHANGED=true" >> $GITHUB_ENV
+          else
+            echo "CHANGED=false" >> $GITHUB_ENV
+          fi
+
+      - name: 💾 提交更新
+        if: env.CHANGED == 'true'  # 仅在 requirements.txt 变更时提交
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore: 更新 requirements.txt [skip ci]"
+          file_pattern: 'requirements.txt'
+          branch: main
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          commit_author: "GitHub Actions Bot <github-actions[bot]@users.noreply.github.com>"
