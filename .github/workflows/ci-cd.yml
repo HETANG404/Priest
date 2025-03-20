@@ -14,9 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write  # 允许 GitHub Actions 写入仓库
+
     steps:
       - name: 🚀 检出代码
         uses: actions/checkout@v4
+
+      - name: 💾 缓存 pip 依赖
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: 🏗 设置 Python 环境
         uses: actions/setup-python@v4
