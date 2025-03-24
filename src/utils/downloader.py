@@ -22,7 +22,7 @@ def download_img_withgroup(url, referer, i, path):  # 获取到图片url后定�
     # name = url.split("/")[-1]  # 分割url最后一段作为image文件名，因为有jeg和png
     
     if os.path.exists(f"{path}/{name}"):
-        print(f'{name}存在', end='  ')
+        print(f'{name}已存在')
         return
 
     for _ in range(20):
@@ -31,10 +31,13 @@ def download_img_withgroup(url, referer, i, path):  # 获取到图片url后定�
             if response.status_code == 200:
                 with open(f"{path}/{name}", "wb") as file:
                     file.write(response.content)
+                    # print(f'{name} 下载成功')
+                    return True
         except requests.exceptions.RequestException:
             print("发生错误:重新连接")
 
-
+    print(f"{name} 最终下载失败", end='  ')
+    return False
 
 
 # pure download
