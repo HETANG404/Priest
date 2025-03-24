@@ -1,0 +1,82 @@
+import os
+import requests
+import threading
+from threading import Thread
+
+
+max_connections = 10  # 定义最大线程数,可根据网速修改
+pool_sema = threading.BoundedSemaphore(max_connections)  # 或使用Semaphore方法
+thread_list = []
+
+def crawler_ranking(url, page, mode):  # https://www.pixiv.net/ranking.php?mode=monthly_r18&p=1&format=json   # https://www.pixiv.net/bookmark_new_illust
+    res = requests.get(url, headers=headers)
+    datas = res.json()["contents"]  # print(datas)
+    images_list = []
+    for data in datas:
+        image = {
+            "title": data["title"],
+            "user_name": data["user_name"],
+            "p_id": data["illust_id"],
+            "referer": f"https://www.pixiv.net/artworks/{data['illust_id']}"
+        }
+        images_list.append(image)  # print(images_list)
+
+    for i in range(len(images_list)):
+        image_1 = images_list[i]
+        image_url = f"https://www.pixiv.net/ajax/illust/{image_1['p_id']}/pages?lang=zh"  # 通过以下链接，请求图片详情
+        print({image_1['p_id']})
+        image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
+        for b in image_data:  # thumb_mini/small/regular/original
+            t = Thread(target=download_img, args=(b['urls']['original'], image_1["referer"], page * 50 + i + 1, mode),
+                       name=image_1['p_id'])
+            thread_list.append(t)
+
+    for t in thread_list:
+        t.start()  # 调用start()方法，开始执行
+
+    for t in thread_list:
+        t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出
+
+
+def crawler_users(url, mode):  # https://www.pixiv.net/ajax/user/23945843/profile/all?lang=zh
+    res = requests.get(url, headers=headers)
+    datas = res.json()["body"]  # print(datas["illusts"])
+
+    images_list = list(datas["illusts"].keys())  # print(images_list)
+
+    for i in range(len(images_list)):
+        image_1 = images_list[i]
+        Referer_ = f"https://www.pixiv.net/artworks/{image_1}"
+        image_url = f"https://www.pixiv.net/ajax/illust/{image_1}/pages?lang=zh"  # 通过以下链接，请求图片详情
+        image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
+        for b in image_data:  # thumb_mini/small/regular/original
+            t = Thread(target=download_img_1, args=(b['urls']['original'], Referer_, mode),
+                       name=image_1)
+            thread_list.append(t)
+
+    for t in thread_list:
+        t.start()  # 调用start()方法，开始执行
+
+    for t in thread_list:
+        t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出
+
+def crawler_latest(url, page, mode):#  https://www.pixiv.net/ajax/follow_latest/illust?p=1&mode=r18&lang=zh
+    res = requests.get(url, headers=headers)
+    datas = res.json()["body"]  # print(datas["illusts"])
+    images_list = datas["page"]["ids"]  # print(images_list, len(images_list))
+
+    for i in range(len(images_list)):
+        image_1 = images_list[i]
+        Referer_ = f"https://www.pixiv.net/artworks/{image_1}"
+        image_url = f"https://www.pixiv.net/ajax/illust/{image_1}/pages?lang=zh"  # 通过以下链接，请求图片详情
+        image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
+        for b in image_data:  # thumb_mini/small/regular/original
+            t = Thread(target=download_img_1, args=(b['urls']['original'], Referer_,  mode),
+                       name=image_1)
+            thread_list.append(t)
+
+    for t in thread_list:
+        t.start()  # 调用start()方法，开始执行
+
+    for t in thread_list:
+        t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出

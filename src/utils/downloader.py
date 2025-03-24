@@ -4,7 +4,7 @@ import requests
 
 只是下载的方法，
     withgroup是当出现连击的时候通过‘i’合并成小组命名
-    download_image是普通的把id作为文件名字
+    download_img是普通的把id作为文件名字
 
 '''
 
