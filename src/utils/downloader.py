@@ -55,12 +55,16 @@ def download_img(url, referer, path):  # 获取到图片url后 注入referer到h
         print(f'{name}存在', end='  ')
         return
 
-    for _ in range(7):  # try 7 times
+    for _ in range(20):
         try:
             response = requests.get(url=url, headers=headers_download)  # print(url)
-            if response.status_code == 200: # 如果状态码为200,then open file write
+            if response.status_code == 200:
                 with open(f"{path}/{name}", "wb") as file:
                     file.write(response.content)
-                return  
+                    # print(f'{name} 下载成功')
+                    return True
         except requests.exceptions.RequestException:
             print("发生错误:重新连接")
+
+    print(f"{name} 最终下载失败", end='  ')
+    return False

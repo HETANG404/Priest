@@ -36,7 +36,7 @@ try:
     cursor = conn.cursor()
 
     # 要检查的表列表
-    tables_to_check = ["images", "tags"]
+    tables_to_check = ["illustrations", "tags"]
 
     for table in tables_to_check:
         check_table_structure(cursor, table)

@@ -10,76 +10,149 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from config.settings import headers
 from utils.downloader import download_img,download_img_withgroup
+from utils.save_info_to_mysql import save_illustration_detail_from_json
+
 
 
 max_connections = 10  # 定义最大线程数,可根据网速修改
 pool_sema = threading.BoundedSemaphore(max_connections)  # 或使用Semaphore方法
 
 
-def crawler_ranking(url, page, path):  # https://www.pixiv.net/ranking.php?mode=monthly_r18&p=1&format=json   # https://www.pixiv.net/bookmark_new_illust
-    res = requests.get(url, headers=headers)
-    datas = res.json()["contents"]  # print(datas)
-    images_list = []
+# def crawler_ranking(url, page, path):  # https://www.pixiv.net/ranking.php?mode=monthly_r18&p=1&format=json   # https://www.pixiv.net/bookmark_new_illust
+#     res = requests.get(url, headers=headers)
+#     datas = res.json()["contents"]  # print(datas)
+#     images_list = []
     
-    print(f"正在统计page:{page+1}下载任务数量...")
+#     print(f"正在统计page:{page+1}下载任务数量...")
 
+#     for data in datas:
+#         image = {
+#             "title": data["title"],
+#             "user_name": data["user_name"],
+#             "p_id": data["illust_id"],
+#             "referer": f"https://www.pixiv.net/artworks/{data['illust_id']}"
+#         }
+#         images_list.append(image)  # print(images_list)
+
+#     thread_list = []
+#     download_count = 0  # 添加下载任务计数器
+
+#     for i in range(len(images_list)):
+#         image_1 = images_list[i]
+#         image_url = f"https://www.pixiv.net/ajax/illust/{image_1['p_id']}/pages?lang=zh"  # 通过以下链接，请求图片详情
+        
+#         # print({image_1['p_id']})
+#         detail_res = requests.get(image_url, headers=headers)
+#         detail_data = detail_res.json()["body"]
+#         save_illustration_detail_from_json(detail_data)
+
+#         image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
+        
+#         for b in image_data:  # thumb_mini/small/regular/original
+#             download_count += 1 # 每创建一个下载任务就计数加1
+#             t = Thread(target=download_img_withgroup, args=(b['urls']['original'], image_1["referer"], page * 50 + i + 1, path),
+#                        name=image_1['p_id'])
+#             thread_list.append(t)
+
+#     print(f"总共有 {download_count} 个下载任务")  # 输出总任务数
+#     print("开始下载...")
+
+#     for t in thread_list:
+#         t.start()  # 调用start()方法，开始执行
+
+#     for t in thread_list:
+#         t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出
+#     print(f"page:{page+1} 下载完成")
+
+# def crawler_users(url, path):  # https://www.pixiv.net/ajax/user/23945843/profile/all?lang=zh
+#     res = requests.get(url, headers=headers)
+#     datas = res.json()["body"]  # print(datas["illusts"])
+
+#     images_list = list(datas["illusts"].keys())  # print(images_list)
+
+#     for i in range(len(images_list)):
+#         image_1 = images_list[i]
+#         Referer_ = f"https://www.pixiv.net/artworks/{image_1}"
+#         image_url = f"https://www.pixiv.net/ajax/illust/{image_1}/pages?lang=zh"  # 通过以下链接，请求图片详情
+#         image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
+#         for b in image_data:  # thumb_mini/small/regular/original
+#             t = Thread(target=download_img, args=(b['urls']['original'], Referer_, path),
+#                        name=image_1)
+#             thread_list.append(t)
+
+#     for t in thread_list:
+#         t.start()  # 调用start()方法，开始执行
+
+#     for t in thread_list:
+#         t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出
+
+def crawler_ranking(url, page, path):
+    print(f"📄 正在统计 page {page+1} 的下载任务...")
+
+    try:
+        res = requests.get(url, headers=headers)
+        res.raise_for_status()
+        datas = res.json().get("contents", [])
+    except Exception as e:
+        print(f"❌ 获取排行榜数据失败：{e}")
+        return
+
+    images_list = []
     for data in datas:
-        image = {
+        images_list.append({
             "title": data["title"],
             "user_name": data["user_name"],
             "p_id": data["illust_id"],
             "referer": f"https://www.pixiv.net/artworks/{data['illust_id']}"
-        }
-        images_list.append(image)  # print(images_list)
+        })
 
     thread_list = []
-    download_count = 0  # 添加下载任务计数器
+    download_count = 0
 
-    for i in range(len(images_list)):
-        image_1 = images_list[i]
-        image_url = f"https://www.pixiv.net/ajax/illust/{image_1['p_id']}/pages?lang=zh"  # 通过以下链接，请求图片详情
-        
-        # print({image_1['p_id']})
+    for idx, image in enumerate(images_list):
+        illust_id = image["p_id"]
 
-        image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
-        
-        for b in image_data:  # thumb_mini/small/regular/original
-            download_count += 1 # 每创建一个下载任务就计数加1
-            t = Thread(target=download_img_withgroup, args=(b['urls']['original'], image_1["referer"], page * 50 + i + 1, path),
-                       name=image_1['p_id'])
+        # 1. 获取作品详情（用于保存入库）
+        detail_url = f"https://www.pixiv.net/ajax/illust/{illust_id}?lang=zh"
+        try:
+            detail_res = requests.get(detail_url, headers=headers)
+            detail_res.raise_for_status()
+            detail_data = detail_res.json().get("body", {})
+            if isinstance(detail_data, dict):
+                save_illustration_detail_from_json(detail_data)
+            else:
+                print(f"⚠️ 作品 {illust_id} 的详情数据格式异常，跳过")
+        except Exception as e:
+            print(f"❌ 获取插画 {illust_id} 详情失败：{e}")
+            continue
+
+        # 2. 获取作品图片（包括多页）
+        image_pages_url = f"https://www.pixiv.net/ajax/illust/{illust_id}/pages?lang=zh"
+        try:
+            image_data = requests.get(image_pages_url, headers=headers).json().get("body", [])
+        except Exception as e:
+            print(f"❌ 获取插画 {illust_id} 图片页失败：{e}")
+            continue
+
+        for b in image_data:
+            download_count += 1
+            t = Thread(
+                target=download_img_withgroup,
+                args=(b['urls']['original'], image["referer"], page * 50 + idx + 1, path),
+                name=str(illust_id)
+            )
             thread_list.append(t)
 
-    print(f"总共有 {download_count} 个下载任务")  # 输出总任务数
-    print("开始下载...")
+    print(f"🧮 总共创建了 {download_count} 个下载任务")
+    print("🚀 开始下载...")
 
     for t in thread_list:
-        t.start()  # 调用start()方法，开始执行
+        t.start()
 
     for t in thread_list:
-        t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出
-    print(f"page:{page+1} 下载完成")
+        t.join()
 
-def crawler_users(url, path):  # https://www.pixiv.net/ajax/user/23945843/profile/all?lang=zh
-    res = requests.get(url, headers=headers)
-    datas = res.json()["body"]  # print(datas["illusts"])
-
-    images_list = list(datas["illusts"].keys())  # print(images_list)
-
-    for i in range(len(images_list)):
-        image_1 = images_list[i]
-        Referer_ = f"https://www.pixiv.net/artworks/{image_1}"
-        image_url = f"https://www.pixiv.net/ajax/illust/{image_1}/pages?lang=zh"  # 通过以下链接，请求图片详情
-        image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
-        for b in image_data:  # thumb_mini/small/regular/original
-            t = Thread(target=download_img, args=(b['urls']['original'], Referer_, path),
-                       name=image_1)
-            thread_list.append(t)
-
-    for t in thread_list:
-        t.start()  # 调用start()方法，开始执行
-
-    for t in thread_list:
-        t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出
+    print(f"✅ 第 {page+1} 页下载完成")
 
 def crawler_latest(url, page, path):#  https://www.pixiv.net/ajax/follow_latest/illust?p=1&mode=r18&lang=zh
     res = requests.get(url, headers=headers)
