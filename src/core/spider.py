@@ -11,7 +11,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from config.settings import headers
 from utils.downloader import download_img,download_img_withgroup
 from utils.save_info_to_mysql import save_illustration_detail_from_json
-
+from utils.create_folder import create_users_folder
 
 
 max_connections = 10  # 定义最大线程数,可根据网速修改
@@ -154,10 +154,26 @@ def crawler_ranking(url, page, path):
 
     print(f"✅ 第 {page+1} 页下载完成")
 
-def crawler_latest(url, page, path):#  https://www.pixiv.net/ajax/follow_latest/illust?p=1&mode=r18&lang=zh
+
+
+def crawler_users(url, user_id):  # https://www.pixiv.net/ajax/user/23945843/profile/all?lang=zh
     res = requests.get(url, headers=headers)
     datas = res.json()["body"]  # print(datas["illusts"])
-    images_list = datas["page"]["ids"]  # print(images_list, len(images_list))
+
+    images_list = list(datas["illusts"].keys())  # print(images_list)
+
+    thread_list = []
+
+    print(f"创建 {images_list.__len__} 个图片下载任务")
+    #获取user_name通过id
+    info_url = f"https://www.pixiv.net/ajax/user/{user_id}?lang=zh"
+    res = requests.get(info_url, headers=headers)
+    user_name = res.json()["body"]["name"]
+    folder_name = user_id + user_name
+
+    path = create_users_folder(folder_name)
+
+    print(f"开始下载...")
 
     for i in range(len(images_list)):
         image_1 = images_list[i]
@@ -165,7 +181,32 @@ def crawler_latest(url, page, path):#  https://www.pixiv.net/ajax/follow_latest/
         image_url = f"https://www.pixiv.net/ajax/illust/{image_1}/pages?lang=zh"  # 通过以下链接，请求图片详情
         image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
         for b in image_data:  # thumb_mini/small/regular/original
-            t = Thread(target=download_img, args=(b['urls']['original'], Referer_,  path),
+            t = Thread(target=download_img, args=(b['urls']['original'], Referer_, path),
+                       name=image_1)
+            thread_list.append(t)
+
+    for t in thread_list:
+        t.start()  # 调用start()方法，开始执行
+
+    for t in thread_list:
+        t.join()  # 子线程调用join()方法，使主线程等待子线程运行完毕之后才退出
+
+
+
+def crawler_latest(url, page, mode):#  https://www.pixiv.net/ajax/follow_latest/illust?p=1&mode=r18&lang=zh
+    res = requests.get(url, headers=headers)
+    datas = res.json()["body"]  # print(datas["illusts"])
+    images_list = datas["page"]["ids"]  # print(images_list, len(images_list))
+
+    thread_list = []
+
+    for i in range(len(images_list)):
+        image_1 = images_list[i]
+        Referer_ = f"https://www.pixiv.net/artworks/{image_1}"
+        image_url = f"https://www.pixiv.net/ajax/illust/{image_1}/pages?lang=zh"  # 通过以下链接，请求图片详情
+        image_data = requests.get(image_url, headers=headers).json()["body"]  # 数据保存在body字段        print(image_data)
+        for b in image_data:  # thumb_mini/small/regular/original
+            t = Thread(target=download_img, args=(b['urls']['original'], Referer_,  mode),
                        name=image_1)
             thread_list.append(t)
 

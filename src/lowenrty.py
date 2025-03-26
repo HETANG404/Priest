@@ -39,12 +39,10 @@ if __name__ == "__main__":
 
         elif choice == '2':   # https://www.pixiv.net/ajax/user/23945843/profile/all?lang=zh
 
-            num = input('输入作者主页号:')
-            mode = 'user' + num
-            if not os.path.exists(mode):
-                os.makedirs(mode)
-            url += 'ajax/user/' + num + '/profile/all?lang=zh'
-            crawler_users(url, mode)
+            user_id = input('输入作者主页号:')
+
+            url += 'ajax/user/' + user_id + '/profile/all?lang=zh'
+            crawler_users(url, user_id)
 
         elif choice == '3':   # https://www.pixiv.net/ajax/follow_latest/illust?lang=zh&mode=r18&p=1
             num = int(input('是否只下载r18(否输入0 是输入1)'))

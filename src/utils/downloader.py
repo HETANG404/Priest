@@ -22,7 +22,7 @@ def download_img_withgroup(url, referer, i, path):  # 获取到图片url后定�
     # name = url.split("/")[-1]  # 分割url最后一段作为image文件名，因为有jeg和png
     
     if os.path.exists(f"{path}/{name}"):
-        print(f'{name}已存在')
+        print(f'🔌 {name}已存在')
         return
 
     for _ in range(20):
@@ -52,7 +52,7 @@ def download_img(url, referer, path):  # 获取到图片url后 注入referer到h
     name = url.split("/")[-1]  # 分割url最后一段作为image文件名，因为有jeg和png
     
     if os.path.exists(f"{path}/{name}"):    #insure that image(name) is not in 'path'folder
-        print(f'{name}存在', end='  ')
+        print(f'🔌 {name}存在')
         return
 
     for _ in range(20):
