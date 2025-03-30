@@ -60,7 +60,7 @@ def main():
                 continue
 
             path = method()
-            pdf_path =  os.path.join(BASE_PATH,"pdfs", f"merged_{mode}_{datetime.datetime.now().strftime("%Y-%m-%d")}.pdf")
+            pdf_path =  os.path.join(BASE_PATH,"pdfs", f"merged_{mode}_{datetime.datetime.now().strftime('%Y-%m-%d')}.pdf")
 
             if mode in {"daily", "weekly", "monthly"}:
                     page = 10
