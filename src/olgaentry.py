@@ -1,5 +1,5 @@
 import os
-from utils.check_folder import check_olga_wm_folder
+from utils.create_loga_folder import check_olga_wm_folder
 import time
 import random
 import sys

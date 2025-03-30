@@ -60,7 +60,7 @@ def download_img_withgroup(url, referer, i, path):  # 获取到图片url后定�
 
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ 发生网络错误: {e}，尝试重新连接... ({name})")
+            print(f"⚠️ 发生网络错误,应该是反爬，小睡一下: {e}，尝试重新连接... ({name})")
             time.sleep(2 + attempt)
 
     print(f"{name} 最终下载失败")
@@ -109,7 +109,7 @@ def download_img(url, referer, path):  # 获取到图片url后 注入referer到h
                 time.sleep(2 + attempt)
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ 发生网络错误: {e}，尝试重新连接... ({name})")
+            print(f"⚠️ 发生网络错误,应该是反爬，小睡一下: {e}，尝试重新连接... ({name})")
             time.sleep(2 + attempt)
 
     print(f"❌ {name} 最终下载失败")
@@ -156,7 +156,7 @@ def download_img_force_check(url, referer, path):  # 获取到图片url后 注�
                 time.sleep(2 + attempt)
 
         except requests.exceptions.RequestException as e:
-            print(f"❌ 发生网络错误: {e}，尝试重新连接... ({name})")
+            print(f"⚠️ 发生网络错误,应该是反爬，小睡一下: {e}，尝试重新连接... ({name})")
             time.sleep(2 + attempt)
 
     print(f"❌ {name} 最终下载失败")

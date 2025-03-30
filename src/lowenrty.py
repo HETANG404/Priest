@@ -33,19 +33,18 @@ def main():
         choice = input("请输入功能编号（ 1 / 2 / 3 / 4 ）：").strip()
 
         if choice == '1':
-            valid_modes = {"daily", "weekly", "monthly", "daily_r18", "weekly_r18","r18g"}
-            print("\n支持模式：daily / weekly / monthly /weekly_r18 / daily_r18 / r18g")
+            valid_modes = {"daily", "weekly", "monthly", "daily_r18", "weekly_r18", "r18g"}
+            print("\n支持模式：daily / weekly / monthly / weekly_r18 / daily_r18 / r18g")
             
-
             mode = input("请输入下载模式：").strip()
 
-            if mode == "weekly_r18g":
+            if mode == "r18g":
                 confirm = input("❗ 该模式涉及严重 R18G 内容，确认继续请输入 yes：").strip().lower()
                 if confirm != "yes":
                     print("⚠️ 已取消下载 R18G 排行榜")
                     input("按回车键返回主菜单...")
                     continue
-            
+
             if mode not in valid_modes:
                 print("❌ 非法模式，请重新输入。")
                 input("按回车键返回主菜单...")
@@ -60,20 +59,48 @@ def main():
                 continue
 
             path = method()
-            pdf_path =  os.path.join(BASE_PATH,"pdfs", f"merged_{mode}_{datetime.datetime.now().strftime('%Y-%m-%d')}.pdf")
 
-            if mode in {"daily", "weekly", "monthly"}:
-                    page = 10
-            elif mode in {"daily_r18", "weekly_r18"}:
-                page = 2
-            elif mode == "r18g":
-                page = 1
+            # 设置默认最大页数
+            default_pages = {
+                "daily": 10,
+                "weekly": 10,
+                "monthly": 10,
+                "daily_r18": 2,
+                "weekly_r18": 2,
+                "r18g": 1
+            }
+
+            max_page = default_pages.get(mode, 1)
+
+            # 提示用户输入页数
+            print(f"💡 {mode} 模式最多支持 {max_page} 页（按回车使用默认）")
+            user_page_input = input("请输入要下载的页数：").strip()
+
+            if user_page_input == "":
+                page = max_page
+            else:
+                if user_page_input.isdigit():
+                    page = int(user_page_input)
+                    if page > max_page or page <= 0:
+                        print(f"❌ 页数超出范围（1 ~ {max_page}）")
+                        input("按回车键返回主菜单...")
+                        continue
+                else:
+                    print("❌ 页数必须是正整数")
+                    input("按回车键返回主菜单...")
+                    continue
+
+            # 生成 PDF 文件路径，拼上页数
+            date_str = datetime.datetime.now().strftime('%Y-%m-%d')
+            pdf_path = os.path.join(BASE_PATH, "pdfs", f"merged_{mode}_{page}p_{date_str}.pdf")
 
             for i in range(page):
                 url = f"{base_url}ranking.php?mode={mode}&p={i + 1}&format=json"
                 crawler_ranking(url, i, path)
 
-            images_to_pdf(path,pdf_path)
+            images_to_pdf(path, pdf_path)
+            print(f"\n📄 PDF 文件已生成：{pdf_path}")
+
 
 
         elif choice == '2':

@@ -33,7 +33,14 @@ def create_daily_folder():
         os.makedirs(folder_path)
         print(f"✅ 成功创建文件夹: {folder_path}\n")
     else:
-        print(f"🔌 文件夹已存在: {folder_path}\n")
+        # 清空该目录下所有图片文件
+        print(f"🔌 文件夹已存在: {folder_path},正在清空...\n")
+        for filename in os.listdir(folder_path):
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                try:
+                    os.remove(os.path.join(folder_path, filename))
+                except Exception as e:
+                    print(f"⚠️ 无法删除 {filename}：{e}")
     
     return folder_path
 
@@ -57,7 +64,14 @@ def create_daily_r18_folder():
         os.makedirs(folder_path)
         print(f"✅ 成功创建文件夹: {folder_path}\n")
     else:
-        print(f"🔌 文件夹已存在: {folder_path}\n")
+        # 清空该目录下所有图片文件
+        print(f"🔌 文件夹已存在: {folder_path},正在清空...\n")
+        for filename in os.listdir(folder_path):
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                try:
+                    os.remove(os.path.join(folder_path, filename))
+                except Exception as e:
+                    print(f"⚠️ 无法删除 {filename}：{e}")
         
     return folder_path
 
@@ -81,7 +95,14 @@ def create_weekly_folder():
         os.makedirs(folder_path)
         print(f"✅ 成功创建文件夹: {folder_path}\n")
     else:
-        print(f"🔌 文件夹已存在: {folder_path}\n")
+        # 清空该目录下所有图片文件
+        print(f"🔌 文件夹已存在: {folder_path},正在清空...\n")
+        for filename in os.listdir(folder_path):
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                try:
+                    os.remove(os.path.join(folder_path, filename))
+                except Exception as e:
+                    print(f"⚠️ 无法删除 {filename}：{e}")
     
     return folder_path
 
@@ -105,7 +126,14 @@ def create_weekly_r18_folder():
         os.makedirs(folder_path)
         print(f"✅ 成功创建文件夹: {folder_path}\n")
     else:
-        print(f"🔌 文件夹已存在: {folder_path}\n")
+        # 清空该目录下所有图片文件
+        print(f"🔌 文件夹已存在: {folder_path},正在清空...\n")
+        for filename in os.listdir(folder_path):
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                try:
+                    os.remove(os.path.join(folder_path, filename))
+                except Exception as e:
+                    print(f"⚠️ 无法删除 {filename}：{e}")
     return folder_path
 
 
@@ -128,7 +156,14 @@ def create_monthly_folder():
         os.makedirs(folder_path)
         print(f"✅ 成功创建文件夹: {folder_path}\n")
     else:
-        print(f"🔌 文件夹已存在: {folder_path}\n")
+        # 清空该目录下所有图片文件
+        print(f"🔌 文件夹已存在: {folder_path},正在清空...\n")
+        for filename in os.listdir(folder_path):
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                try:
+                    os.remove(os.path.join(folder_path, filename))
+                except Exception as e:
+                    print(f"⚠️ 无法删除 {filename}：{e}")
     return folder_path
 
 
@@ -151,7 +186,14 @@ def create_r18g_folder():
         os.makedirs(folder_path)
         print(f"✅ 成功创建文件夹: {folder_path}\n")
     else:
-        print(f"🔌 文件夹已存在: {folder_path}\n")
+        # 清空该目录下所有图片文件
+        print(f"🔌 文件夹已存在: {folder_path},正在清空...\n")
+        for filename in os.listdir(folder_path):
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png', '.webp')):
+                try:
+                    os.remove(os.path.join(folder_path, filename))
+                except Exception as e:
+                    print(f"⚠️ 无法删除 {filename}：{e}")
     return folder_path
 
 
