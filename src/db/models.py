@@ -1,5 +1,5 @@
 # models.py
-from sqlalchemy import Column, Integer, String, DateTime, Text, Table, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, Text, Table, ForeignKey, BigInteger
 from sqlalchemy import SmallInteger
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -24,6 +24,9 @@ class Illustration(Base):
     width = Column(Integer, nullable=False)
     height = Column(Integer, nullable=False)
     image_url = Column(Text, nullable=False)
+
+    save_date = Column(BigInteger, nullable=False)
+
 
     tags = relationship('Tag', secondary=illustration_tag, back_populates='illustrations')
 

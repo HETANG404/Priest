@@ -34,38 +34,32 @@ deactivate
 ```
 Priest/
 │
-├── config/
-│   ├── __init__.py
-│   ├── settings.py       # 项目配置
-│   ├── mysql.py          # MySQL配置
-│   └── redis.py          # Redis配置
+├─ config/                     # 配置模块
 │
-├── src/
-│   │
-│   ├── core/
-│   │   ├── spider.py
-│   │   └── scheduler.py
-│   │
-│   ├── db/
-│   │   ├── __init__.py
-│   │   ├── mysql_manager.py   # MySQL操作
-│   │   ├── redis_manager.py   # Redis操作
-│   │   ├── query_handler.py   # 新增查询处理器
-│   │   └── models.py
-│   │
-│   ├── utils/
-│   │   ├── downloader.py
-│   │   └── logger.py
-│   │
-│   └── cli.py
+├─ data/                       # 本地数据资源
+│  ├─ database/                # 数据库存储
+│  └─ images/                  # 图片资源（即将只保留本地）
+│     ├─ following/
+│     ├─ ranking/
+│     │  ├─ daily/
+│     │  ├─ daily_r18/
+│     │  ├─ monthly/
+│     │  ├─ weekly/
+│     │  └─ weekly_r18/
+│     └─ users/
+│        └─ 
 │
-├── data/
-│   ├── images/
-│   └── database/         # 保留目录（存放迁移脚本等）
+├─ migrations/                 # 数据库迁移文件
 │
-├── migrations/           # 新增数据库迁移目录
-├── tests/
-├── requirements.txt
-└── README.md
+├─ priestvenv/                 # Python 虚拟环境文件夹
+│
+│
+├─ src/
+│  ├─ core/                    # 业务逻辑
+│  ├─ db/                      # 数据库模型及连接逻辑
+│  └─ utils/                   # 工具
+│
+├─ tests/                      # 测试代码目录
+
 
 ```

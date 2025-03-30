@@ -1,67 +1,121 @@
 import utils.create_folder
 from core.spider import *
 from utils.create_folder import *
+import datetime
+
+from config.settings import BASE_PATH
 
 
+import os
+import utils.create_folder as create_folder  # 假设你是这么导入的
+from core.spider import *  # 假设你封装了这几个函数
+import sys
 
-if __name__ == "__main__":
-    print('''1.下载排行榜(日/周/月榜)
-2.下载画师主页
-3.下载个人主页最近更新''')
+from utils.pdf_factory import images_to_pdf
 
-    url = 'https://www.pixiv.net/'
+
+def print_menu():
+    print("=" * 50)
+    print(" Pixiv 插画下载工具 ")
+    print("=" * 50)
+    print("1. 下载日周月而十八天梯，自选模式")
+    print("2. 下载指定画师全部作品，需要挨滴")
+    print("3. 下载关注用户最新更新, 打打牙祭")
+    print("4. 下载关注用户全量更新，火力全开")
+    print("=" * 50)
+
+def main():
+    base_url = 'https://www.pixiv.net/'
+    
     while True:
-        choice = input('请输入想要下载的模式：')
-        if choice == '1':   # https://www.pixiv.net/ranking.php?mode=monthly&p=1&format=json
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print_menu()
+        choice = input("请输入功能编号（ 1 / 2 / 3 / 4 ）：").strip()
 
-            valid_modes = {"daily", "weekly"}
+        if choice == '1':
+            valid_modes = {"daily", "weekly", "monthly", "daily_r18", "weekly_r18","r18g"}
+            print("\n支持模式：daily / weekly / monthly /weekly_r18 / daily_r18 / r18g")
+            
 
-            print('输入下载的模式: daily / daily_r18 / weekly / weekly_r18 / monthly')
-            mode = input('输入上面的选项之一:')
+            mode = input("请输入下载模式：").strip()
+
+            if mode == "weekly_r18g":
+                confirm = input("❗ 该模式涉及严重 R18G 内容，确认继续请输入 yes：").strip().lower()
+                if confirm != "yes":
+                    print("⚠️ 已取消下载 R18G 排行榜")
+                    input("按回车键返回主菜单...")
+                    continue
             
             if mode not in valid_modes:
-                raise ValueError("非法模式")
+                print("❌ 非法模式，请重新输入。")
+                input("按回车键返回主菜单...")
+                continue
 
-            relative_path = mode
+            method_name = f"create_{mode}_folder"
+            method = getattr(create_folder, method_name, None)
 
-            method_name = f"create_{relative_path}_folder"  # 动态拼接方法名
-            method = getattr(utils.create_folder,method_name)  # 获取方法对象
+            if not callable(method):
+                print(f"❌ 未找到对应的文件夹创建方法: {method_name}")
+                input("按回车键返回主菜单...")
+                continue
 
-            if callable(method):
-                path = method()  # 执行方法
-            else:
-                raise ValueError(f"未找到方法: {method_name}")
+            path = method()
+            pdf_path =  os.path.join(BASE_PATH,"pdfs", f"merged_{mode}_{datetime.datetime.now().strftime("%Y-%m-%d")}.pdf")
 
-            page = int(input('输入想要下载的页数(50张为一页):'))
+            if mode in {"daily", "weekly", "monthly"}:
+                    page = 10
+            elif mode in {"daily_r18", "weekly_r18"}:
+                page = 2
+            elif mode == "r18g":
+                page = 1
+
             for i in range(page):
-                url += f"ranking.php?mode={mode}&p={i+1}&format=json"
+                url = f"{base_url}ranking.php?mode={mode}&p={i + 1}&format=json"
                 crawler_ranking(url, i, path)
 
-        elif choice == '2':   # https://www.pixiv.net/ajax/user/23945843/profile/all?lang=zh
+            images_to_pdf(path,pdf_path)
 
-            user_id = input('输入作者主页号:')
 
-            url += 'ajax/user/' + user_id + '/profile/all?lang=zh'
+        elif choice == '2':
+            user_id = input("\n请输入画师的用户ID：").strip()
+            url = f"{base_url}ajax/user/{user_id}/profile/all?lang=zh"
             crawler_users(url, user_id)
 
-        elif choice == '3':   # https://www.pixiv.net/ajax/follow_latest/illust?lang=zh&mode=r18&p=1
-            num = int(input('是否只下载r18(否输入0 是输入1)'))
-            page = int(input('输入想要下载的页数(60张为一页):'))
-            mode = 'latest'
-            url += 'ajax/follow_latest/illust?lang=zh'
-            if num:
-                url += '&mode=r18'
-                mode += '_r18'
-            if not os.path.exists(mode):
-                os.makedirs(mode)
+        elif choice == '3':
+            try:
+                page = int(input("请输入下载页数（每页60张）：").strip())
+            except ValueError:
+                print("❌ 输入无效，必须是整数。")
+                input("按回车键返回主菜单...")
+                continue
+
+            url = f"{base_url}ajax/follow_latest/illust?lang=zh&mode=r18"
+            
+            path = os.path.join(BASE_PATH, "following")
+
+            if not os.path.exists(path):
+                print(f"❌ 文件夹不存在：{path}，请手动创建后再运行程序。")
+                sys.exit(1)  # 🚨 直接退出程序
+            
+            print("开始下载...\n")
             for i in range(page):
-                url += f"&p={i+1}"
-                crawler_latest(url, i, mode)
+                page_url = f"{url}&p={i + 1}"
+                crawler_latest_following(page_url, path)
+
+        elif choice == '4':
+
+
+                
+            print(crawler_following())
+
 
         else:
-            print('输入错误，请输入 1, 2 or 3')
+            print("❌ 输入错误，请输入 1, 2 或 3。")
+            input("按回车键返回主菜单...")
             continue
-        break
-    print('下载任务结束')
 
-# https://www.pixiv.net/artworks/92691155
+        print("\n✅ 下载任务完成！")
+        break
+
+if __name__ == "__main__":
+    main()
