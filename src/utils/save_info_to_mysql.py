@@ -11,7 +11,7 @@ def save_illustration_detail_from_json(data,save_date):
             existing = session.query(Illustration).filter_by(illust_id=int(data["illustId"])).first()
             if existing:
                 print(f"🔁 插画 {data['illustId']} 已存在，跳过插入")
-                return
+                return False
 
             # 👇 创建 Illustration 实例
             illust = Illustration(
@@ -51,6 +51,7 @@ def save_illustration_detail_from_json(data,save_date):
 
             session.commit()
             print(f"✅ 已保存插画 {data['illustId']} 的详细信息到数据库")
+            return True
 
     except IntegrityError as e:
         print(f"❌ 插画 {data['illustId']} 插入失败（主键冲突）：{e}")

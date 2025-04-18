@@ -21,7 +21,7 @@ def check_olga_wm_folder():
     """
     
     # 构建完整路径
-    path = os.path.join(BASE_PATH, "olga")
+    path = os.path.join(BASE_PATH, "olga", "olga_wm")
     
 
     # 检查文件夹是否已存在
